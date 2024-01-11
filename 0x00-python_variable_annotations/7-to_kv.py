@@ -6,7 +6,7 @@ from typing import Tuple, Union
 """import requred types from typing module"""
 
 
-def to_kv(k: str, v: Union[int, float]) -> Tuple[str, Union[int, float]]:
+def to_kv(k: str, v: Union[int, float]) -> Tuple[str, float]:
     """takes in k as string and v as either int or float,
     then returns a tuple of k and v"""
     result: tuple = (k, v * v)
