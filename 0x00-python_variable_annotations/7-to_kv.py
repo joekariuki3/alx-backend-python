@@ -3,6 +3,7 @@
 and returns a tuple(k: str, squre of v int or float)
 """
 from typing import Tuple, Union
+"""import requred types from typing module"""
 
 
 def to_kv(k: str, v: Union[int, float]) -> Tuple[str, Union[int, float]]:
