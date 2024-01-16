@@ -9,4 +9,4 @@ async def async_generator():
     a random number"""
     for _ in range(1, 11):
         await asyncio.sleep(1)
-        yield random.uniform(0, 10)
+        yield random.uniform(1, 9)
