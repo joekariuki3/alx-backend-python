@@ -7,6 +7,7 @@ async_comprehension = __import__('1-async_comprehension').async_comprehension
 
 
 async def measure_runtime():
+    """Run time for four parallel comprehensions"""
     start_time = time.time()
     task1 = async_comprehension()
     task2 = async_comprehension()
