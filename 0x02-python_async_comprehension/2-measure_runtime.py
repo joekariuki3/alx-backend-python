@@ -12,7 +12,7 @@ async def measure_runtime():
     task2 = await async_comprehension()
     task3 = await async_comprehension()
     task4 = await async_comprehension()
-    asyncio.gather(task1, task2, task3, task4)
+    await asyncio.gather(task1, task2, task3, task4)
     end_time = time.time()
     execute_time = end_time - start_time
-    return executr_time
+    return execute_time
