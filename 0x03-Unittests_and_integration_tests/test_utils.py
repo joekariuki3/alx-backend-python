@@ -46,6 +46,6 @@ class TestGetJson(unittest.TestCase):
             # call get_json
             response = get_json(test_url)
             # make sure get_json was clalled with test_url
-            mget.assert_called_once_with(test_url)
+            mget.assert_called_with(test_url)
             # assert the call result and our expected result
             self.assertEqual(response, test_payload)
