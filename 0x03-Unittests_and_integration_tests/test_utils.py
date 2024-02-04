@@ -2,6 +2,7 @@
 """TestAccessNestedMap class"""
 
 import unittest
+from unittest.mock import patch, Mock
 from utils import access_nested_map, get_json
 from typing import Sequence, Mapping, Any, Callable
 from parameterized import parameterized
@@ -39,10 +40,12 @@ class TestGetJson(unittest.TestCase):
     def test_get_json(self, test_url, test_payload):
         """test get json call using mock using the request.get
         method"""
-        with unittest.mock.patch("requests.get") as mget:
+        with patch("requests.get") as mget:
             # asign return value as json cause get_json uses json()
             # then on json() assign now the real data test_payload
-            mget.return_value.json.return_value = test_payload
+            result = Mock()
+            result.json.return_value = test_payload
+            mget.return_value = result
             # call get_json
             response = get_json(test_url)
             # make sure get_json was clalled with test_url
