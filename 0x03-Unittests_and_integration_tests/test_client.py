@@ -12,6 +12,7 @@ class TestGithubOrgClient(unittest.TestCase):
     @parameterized.expand([("google"), ("abc")])
     @patch.object(GithubOrgClient, "org")
     def test_org(self, org_name, mock_org):
+        """test implementation for org method"""
         url = f"https://api.github.com/orgs/{org_name}"
         fake_dict = {"company": org_name}
         mock_org.return_value = fake_dict
@@ -33,30 +34,29 @@ class TestGithubOrgClient(unittest.TestCase):
         self.assertEqual(urls, fake_url_list)
 
     @patch('client.get_json')
-    @patch.object(GithubOrgClient,
-                  '_public_repos_url',
-                  new_callable=PropertyMock)
-    def test_public_repos(self, mock_public_repos_url, mock_get_json):
+    def test_public_repos(self, mock_get_json):
         """test the public repo method"""
-        # Mocked payload for get_json
+    # Mocked payload for get_json
         mocked_payload = [
             {"name": "google", "license": {"key": "mit"}},
             {"name": "facebook", "license": {"key": "apache"}},
             {"name": "tesla", "license": {"key": "mit"}}
         ]
+        with patch.object(GithubOrgClient,
+                          '_public_repos_url',
+                          new_callable=PropertyMock) as mock_public_repos_url:
+            # Mocking the property and method
+            url = "https://api.github.com/orgs/google/repos"
+            mock_public_repos_url.return_value = url
+            mock_get_json.return_value = mocked_payload
 
-        # Mocking the property and method
-        url = "https://api.github.com/orgs/google/repos"
-        mock_public_repos_url.return_value = url
-        mock_get_json.return_value = mocked_payload
+            # Initialize the GithubOrgClient
+            github_client = GithubOrgClient("google")
 
-        # Initialize the GithubOrgClient
-        github_client = GithubOrgClient("google")
+            # Call the method being tested
+            repos = github_client.public_repos(license="mit")
 
-        # Call the method being tested
-        repos = github_client.public_repos(license="mit")
-
-        # Assertions
-        mock_public_repos_url.assert_called_once()
-        mock_get_json.assert_called_once_with(url)
-        self.assertEqual(repos, ["google", "tesla"])
+            # Assertions
+            mock_public_repos_url.assert_called_once()
+            mock_get_json.assert_called_once_with(url)
+            self.assertEqual(repos, ["google", "tesla"])
