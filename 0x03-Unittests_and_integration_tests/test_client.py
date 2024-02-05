@@ -8,6 +8,7 @@ from client import GithubOrgClient
 
 
 class TestGithubOrgClient(unittest.TestCase):
+    """implementation of unitTests on methods in GithubOrgClient class"""
 
     @parameterized.expand([("google"), ("abc")])
     @patch.object(GithubOrgClient, "org")
