@@ -16,11 +16,13 @@ def stream_users():
     )
 
     cursor = connection.cursor()
+    try:
+        cursor.execute("SELECT * FROM user_data")
 
-    cursor.execute("SELECT * FROM user_data")
-
-    for row in cursor:
-        yield row
-
-    cursor.close()
-    connection.close()
+        for row in cursor:
+            yield row
+    except Exception as e:
+        print(f"An error occurred: {e}")
+    finally:
+        cursor.close()
+        connection.close()
