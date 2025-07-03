@@ -29,6 +29,7 @@ def stream_users_in_batches(batch_size: int):
     finally:
         cursor.close()
         connection.close()
+    return None
 
 
 def batch_processing(batch_size: int):
@@ -42,3 +43,5 @@ def batch_processing(batch_size: int):
         for user in batch:
             if user['age'] > age_limit:
                 print(user)
+
+    return None
