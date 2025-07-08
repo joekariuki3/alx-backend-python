@@ -23,7 +23,7 @@ def create_users_db():
 
     conn = connect_to_db()
     c = conn.cursor()
-    c.execute("CREATE TABLE users (id INTEGER PRIMARY KEY, username TEXT, password TEXT)")
+    c.execute("CREATE TABLE users (id INTEGER PRIMARY KEY, username TEXT, email TEXT, password TEXT)")
     conn.commit()
     conn.close()
 
@@ -48,18 +48,18 @@ def populate_users_db():
     conn = connect_to_db()
     c = conn.cursor()
     users = [
-        ('alice', 'password123'),
-        ('bob', 'qwerty'),
-        ('charlie', 'letmein'),
-        ('dave', '12345678'),
-        ('eve', 'iloveyou'),
-        ('frank', 'admin123'),
-        ('grace', 'welcome'),
-        ('heidi', 'password1'),
-        ('ivan', 'secret'),
-        ('jack', 'passw0rd'),
+        ('alice','alice@example.com' , 'password123'),
+        ('bob', 'bob@example.com' , 'qwerty'),
+        ('charlie', 'charlie@example.com', 'letmein'),
+        ('dave', 'dave@example.com', '12345678'),
+        ('eve', 'eve@example.com', 'iloveyou'),
+        ('frank', 'frank@example.com', 'admin123'),
+        ('grace', 'grace@example.com', 'welcome'),
+        ('heidi', 'heidi@example.com', 'password1'),
+        ('ivan', 'ivan@example.com', 'secret'),
+        ('jack', 'jack@example.com', 'passw0rd'),
     ]
-    c.executemany("INSERT INTO users (username, password) VALUES (?, ?)", users)
+    c.executemany("INSERT INTO users (username, email, password) VALUES (?, ?, ?)", users)
     conn.commit()
     conn.close()
 
