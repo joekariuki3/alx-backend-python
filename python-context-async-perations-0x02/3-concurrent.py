@@ -25,7 +25,7 @@ async def async_fetch_users():
     await close_connection(connection)
     return results
 
-async def async_fetch_old_users():
+async def async_fetch_older_users():
     """fetches all users older than 40"""
     query = "SELECT * FROM users WHERE age > 40;"
 
@@ -37,7 +37,7 @@ async def async_fetch_old_users():
 
 async def fetch_concurrently():
     """uses asyncio.gather to execute async_fetch_users and async_fetch_old_users"""
-    results = await asyncio.gather(async_fetch_users(), async_fetch_old_users())
+    results = await asyncio.gather(async_fetch_users(), async_fetch_older_users())
 
     for result in results:
         print(result)
