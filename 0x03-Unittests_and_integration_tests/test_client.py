@@ -83,7 +83,7 @@ class TestGithubOrgClient(unittest.TestCase):
     }
 ])
 class TestIntegrationGithubOrgClient(unittest.TestCase):
-    """Integration test class for github org client"""
+    """Integration test class for GitHub org client"""
 
     @classmethod
     def setUpClass(cls):
@@ -118,3 +118,32 @@ class TestIntegrationGithubOrgClient(unittest.TestCase):
         # Stop the patcher
         cls.get_patcher.stop()
 
+
+def test_public_repos(self):
+    """Test the public_repos method without a license"""
+    # Create an instance with GitHub as the org name
+    github_client = GithubOrgClient("github")
+
+    # Get the list of repositories
+    repos = github_client.public_repos()
+
+    # Check that the list of repositories is correct
+    self.assertEqual(repos, self.expected_repos)
+
+    # Verify that the mocked get was called correctly
+    self.mock_get.assert_called()
+
+
+def test_public_repos_with_license(self):
+    """Test the public_repos method with a license argument"""
+    # Create an instance with GitHub as the org name
+    github_client = GithubOrgClient("github")
+
+    # Get the list of repositories with apache-2.0 license
+    repos = github_client.public_repos(license="apache-2.0")
+
+    # Check that the list of repositories is correct
+    self.assertEqual(repos, self.apache2_repos)
+
+    # Verify that the mocked get was called
+    self.mock_get.assert_called()
