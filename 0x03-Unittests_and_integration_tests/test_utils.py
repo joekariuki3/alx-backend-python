@@ -38,17 +38,17 @@ class TestGetJson(unittest.TestCase):
         ("http://holberton.io", {"payload": False})
         ])
     def test_get_json(self, test_url, test_payload):
-        """test get json call using mock using the request.get
+        """test gets JSON call using mock using the request.get
         method"""
         with patch("requests.get") as mget:
-            # asign return value as json cause get_json uses json()
+            # assign the return value as JSON cause get_json uses json()
             # then on json() assign now the real data test_payload
             result = Mock()
             result.json.return_value = test_payload
             mget.return_value = result
             # call get_json
             response = get_json(test_url)
-            # make sure get_json was clalled with test_url
+            # make sure get_json was called with test_url
             mget.assert_called_with(test_url)
             # assert the call result and our expected result
             self.assertEqual(response, test_payload)

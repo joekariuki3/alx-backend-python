@@ -2,6 +2,7 @@
 """TestGithubOrgClient class implementation"""
 
 import unittest
+import requests
 from parameterized import parameterized, parameterized_class
 from unittest.mock import patch, PropertyMock
 from client import GithubOrgClient
@@ -14,7 +15,7 @@ class TestGithubOrgClient(unittest.TestCase):
     @parameterized.expand([("google"), ("abc")])
     @patch.object(GithubOrgClient, "org")
     def test_org(self, org_name, mock_org):
-        """test implementation for org method"""
+        """test implementation for the org method"""
         url = f"https://api.github.com/orgs/{org_name}"
         fake_dict = {"company": org_name}
         mock_org.return_value = fake_dict
@@ -38,7 +39,7 @@ class TestGithubOrgClient(unittest.TestCase):
     @patch('client.get_json')
     def test_public_repos(self, mock_get_json):
         """test the public repo method"""
-    # Mocked payload for get_json
+        # Mocked payload for get_json
         mocked_payload = [
             {"name": "google", "license": {"key": "mit"}},
             {"name": "facebook", "license": {"key": "apache"}},
@@ -73,7 +74,8 @@ class TestGithubOrgClient(unittest.TestCase):
         self.assertEqual(result, output)
 
 
-@parameterized_class(('org_payload', 'repos_payload', 'expected_repos', 'apache2_repos'), [()])
+@parameterized_class(('org_payload', 'repos_payload',
+                      'expected_repos', 'apache2_repos'), [()])
 class TestIntegrationGithubOrgClient(unittest.TestCase):
     """integration test for methods that sends external requests"""
 
