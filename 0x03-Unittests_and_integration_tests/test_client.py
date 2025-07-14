@@ -6,7 +6,7 @@ import requests
 from parameterized import parameterized, parameterized_class
 from unittest.mock import patch, PropertyMock
 from client import GithubOrgClient
-from fixtures import TEST_PAYLOAD
+from fixtures import TEST_PAYLOAD, org_payload, repos_payload, expected_repos, apache2_repos
 
 
 class TestGithubOrgClient(unittest.TestCase):
@@ -74,19 +74,47 @@ class TestGithubOrgClient(unittest.TestCase):
         self.assertEqual(result, output)
 
 
-@parameterized_class(('org_payload', 'repos_payload',
-                      'expected_repos', 'apache2_repos'), [()])
+@parameterized_class([
+    {
+        'org_payload': org_payload,
+        'repos_payload': repos_payload,
+        'expected_repos': expected_repos,
+        'apache2_repos': apache2_repos
+    }
+])
 class TestIntegrationGithubOrgClient(unittest.TestCase):
-    """integration test for methods that sends external requests"""
+    """Integration test class for github org client"""
 
     @classmethod
-    @patch("requests.get")
-    def setUpClass(cls, mock_request_get):
-        """setup class"""
-        mock_request_get.return_value = TEST_PAYLOAD
-        payload = requests.get()
+    def setUpClass(cls):
+        """Set up class for integration testing"""
+        # Create the patcher for requests.get
+        cls.get_patcher = patch('requests.get')
+        # Start the patcher - mock_get will be used as the mock object
+        cls.mock_get = cls.get_patcher.start()
+
+        # Configure side effect to return different responses based on URL
+        def side_effect(url):
+            """Side effect function to mock json responses"""
+            # Mock response object
+            class MockResponse:
+                def __init__(self, json_data):
+                    self._json_data = json_data
+
+                def json(self):
+                    return self._json_data
+
+            # Return appropriate fixtures based on the URL
+            if url.endswith("/orgs/github"):
+                return MockResponse(cls.org_payload)
+            return MockResponse(cls.repos_payload)
+
+        # Set the side effect on the mock object
+        cls.mock_get.side_effect = side_effect
 
     @classmethod
     def tearDownClass(cls):
-        """teardown class"""
-        pass
+        """Tear down class after integration testing"""
+        # Stop the patcher
+        cls.get_patcher.stop()
+
