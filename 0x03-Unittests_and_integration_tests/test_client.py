@@ -46,30 +46,28 @@ class TestGithubOrgClient(unittest.TestCase):
         with mocked get_json and _public_repos_url"""
         # Mocked payload for get_json
         mocked_payload = [
-            {"name": "repo1", "license": {"key": "mit"}},
-            {"name": "repo2", "license": {"key": "apache"}},
-            {"name": "repo3", "license": {"key": "mit"}}
-            {"name": "repo1", "license": {"key": "mit"}},
-            {"name": "repo2", "license": {"key": "apache"}},
-            {"name": "repo3", "license": {"key": "mit"}}
+            {"name": "google", "license": {"key": "mit"}},
+            {"name": "facebook", "license": {"key": "apache"}},
+            {"name": "tesla", "license": {"key": "mit"}}
         ]
-        expected_repos = ["repo1", "repo2", "repo3"]
-
-        with patch.object(GithubOrgClient, '_public_repos_url',
+        with patch.object(GithubOrgClient,
+                          '_public_repos_url',
                           new_callable=PropertyMock) as mock_public_repos_url:
-            url = "https://api.github.com/orgs/test_org/repos"
+            # Mocking the property and method
+            url = "https://api.github.com/orgs/google/repos"
             mock_public_repos_url.return_value = url
             mock_get_json.return_value = mocked_payload
 
-            client = GithubOrgClient("test_org")
-            repos = client.public_repos()
-            client = GithubOrgClient("test_org")
-            repos = client.public_repos()
+            # Initialize the GithubOrgClient
+            github_client = GithubOrgClient("google")
 
-            self.assertEqual(repos, expected_repos)
-            self.assertEqual(repos, expected_repos)
+            # Call the method being tested
+            repos = github_client.public_repos(license="mit")
+
+            # Assertions
             mock_public_repos_url.assert_called_once()
             mock_get_json.assert_called_once_with(url)
+            self.assertEqual(repos, ["google", "tesla"])
 
     @parameterized.expand([
         ({"license": {"key": "my_license"}}, "my_license", True),
