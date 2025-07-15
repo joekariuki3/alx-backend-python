@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
-"""TestGithubOrgClient class implementation"""
+"""TestGithubOrgClient class implementation
+"""
 
 import unittest
 import requests
@@ -11,7 +12,8 @@ from fixtures import (TEST_PAYLOAD, org_payload,
 
 
 class TestGithubOrgClient(unittest.TestCase):
-    """implementation of unitTests on methods in GithubOrgClient class"""
+    """implementation of unitTests on methods in GithubOrgClient class
+    """
 
     @parameterized.expand([("google"), ("abc")])
     @patch.object(GithubOrgClient, "org")
@@ -27,7 +29,8 @@ class TestGithubOrgClient(unittest.TestCase):
 
     def test_public_repos_url(self):
         """Test GithubOrgClient._public_repos_url
-        property with mocked org payload"""
+        property with mocked org payload
+        """
         expected_url = "https://api.github.com/orgs/test_org/repos"
         payload = {"repos_url": expected_url}
 
@@ -73,7 +76,8 @@ class TestGithubOrgClient(unittest.TestCase):
         ({"license": {"key": "other_license"}}, "my_license", False)
         ])
     def test_has_license(self, repo, license_key, output):
-        """test for has_license method for GithubOrgClient class"""
+        """test for has_license method for GithubOrgClient class
+        """
         result = GithubOrgClient.has_license(repo, license_key)
         self.assertEqual(result, output)
 
@@ -87,8 +91,8 @@ class TestGithubOrgClient(unittest.TestCase):
     }
 ])
 class TestIntegrationGithubOrgClient(unittest.TestCase):
-    """Integration test class for GitHub org client"""
-
+    """Integration test class for GitHub org client
+    """
     @classmethod
     def setUpClass(cls):
         """Set up class for integration testing"""
@@ -118,13 +122,15 @@ class TestIntegrationGithubOrgClient(unittest.TestCase):
 
     @classmethod
     def tearDownClass(cls):
-        """Tear down class after integration testing"""
+        """Tear down class after integration testing
+        """
         # Stop the patcher
         cls.get_patcher.stop()
 
 
 def test_public_repos(self):
-    """Test the public_repos method without a license"""
+    """Test the public_repos method without a license
+    """
     # Create an instance with GitHub as the org name
     github_client = GithubOrgClient("github")
 
@@ -139,7 +145,8 @@ def test_public_repos(self):
 
 
 def test_public_repos_with_license(self):
-    """Test the public_repos method with a license argument"""
+    """Test the public_repos method with a license argument
+    """
     # Create an instance with GitHub as the org name
     github_client = GithubOrgClient("github")
 
