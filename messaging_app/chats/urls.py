@@ -1,12 +1,15 @@
 from django.urls import path, include
 from .views import ConversationViewSet, MessageViewSet
-from rest_framework import routers
+from rest_framework_nested import routers
 
-routers = routers.DefaultRouter()
-routers.register('conversations', ConversationViewSet)
-routers.register('messages', MessageViewSet)
+router = routers.DefaultRouter()
+router.register('conversations', ConversationViewSet)
 
+conversation_router = routers.NestedDefaultRouter(router, 'conversations', lookup='conversation')
+conversation_router.register('messages', MessageViewSet, basename='conversation-messages')
 
 urlpatterns = [
-    path('', include(routers.urls)),
+    path('', include(router.urls)),
+    path('', include(conversation_router.urls)),
+    path('api-auth/', include('rest_framework.urls', namespace='rest_framework'))
 ]
