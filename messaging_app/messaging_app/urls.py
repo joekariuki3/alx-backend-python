@@ -21,4 +21,5 @@ from ..chats import urls as chats_urls
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/', include(chats_urls)),
+    path('api-auth/', include('rest_framework.urls', namespace='rest_framework'))
 ]

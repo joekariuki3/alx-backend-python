@@ -11,5 +11,4 @@ conversation_router.register('messages', MessageViewSet, basename='conversation-
 urlpatterns = [
     path('', include(router.urls)),
     path('', include(conversation_router.urls)),
-    path('api-auth/', include('rest_framework.urls', namespace='rest_framework'))
 ]
