@@ -75,15 +75,29 @@ git clone <repository-url>
 cd messaging_app
 ```
 
-2. Create and activate a virtual environment:
+### Option 1: Using UV (Recommended)
+
+1. Install dependencies using UV:
+```bash
+uv install
+```
+
+2. For adding new dependencies:
+```bash
+uv add <package-name>
+```
+
+### Option 2: Using Virtual Environment & Pip
+
+1. Create and activate a virtual environment:
 ```bash
 python -m venv venv
 source venv/bin/activate  # On Windows: venv\Scripts\activate
 ```
 
-3. Install dependencies using UV:
+2. Install dependencies using pip:
 ```bash
-uv pip install -r requirements.txt
+pip install -r requirements.txt
 ```
 
 4. Run migrations:
@@ -134,6 +148,33 @@ python manage.py test
 
 ### Code Style
 Follow PEP 8 guidelines for Python code style.
+
+### Dependency Management
+
+This project uses UV for dependency management with a `pyproject.toml` file:
+
+- `uv.lock` - Lock file that stores exact versions of dependencies
+- `pyproject.toml` - Defines project metadata and dependencies
+
+#### Adding Dependencies
+
+```bash
+# With UV
+uv add package_name
+
+# With pip (will not update pyproject.toml)
+pip install package_name
+```
+
+#### Updating Dependencies
+
+```bash
+# With UV
+uv sync
+
+# With pip
+pip install -r requirements.txt
+```
 
 ## Contributing
 
