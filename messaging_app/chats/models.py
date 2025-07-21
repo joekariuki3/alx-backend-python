@@ -24,6 +24,9 @@ class User(AbstractUser):
     user management in an application with clearly defined roles and attributes.
     """
     user_id = models.UUIDField(primary_key=True, default=uuid4, editable=False)
+    first_name = models.CharField(max_length=150, null=False)
+    last_name = models.CharField(max_length=150, null=False)
+    email = models.EmailField(unique=True, null=False)
     password_hash = models.CharField(max_length=128, null=False)
     phone_number = models.CharField(max_length=15, null=True)
     role = models.CharField(max_length=10, choices=UserRole.choices)
