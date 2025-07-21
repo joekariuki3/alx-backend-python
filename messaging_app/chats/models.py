@@ -74,6 +74,7 @@ class Message(models.Model):
                  set when the message is created.
     """
     message_id = models.UUIDField(primary_key=True, default=uuid4, editable=False)
-    sender_id = models.ForeignKey(User, on_delete=models.CASCADE, related_name="messages")
+    sender_id = models.ForeignKey(User, on_delete=models.CASCADE, related_name="sender")
+    conversation = models.ForeignKey(Conversation, on_delete=models.CASCADE, related_name="messages")
     message_body = models.TextField(null=False)
     sent_at = models.DateTimeField(auto_now_add=True)
