@@ -1,50 +1,72 @@
 from rest_framework import serializers
-from .models import User, Conversation, Message
-
+from .models import User, Conversation, Message, UserRole
 
 class UserSerializer(serializers.ModelSerializer):
+    """Serializer for user objects
+    This serializer is used to convert User model instance into JSON
+    and vice versa.
+    It includes all essential fields for user representation, excluding
+    sensitive information like password_hash
+    """
+    role = serializers.ChoiceField(choices=UserRole.choices)
+
     class Meta:
         model = User
-        fields = ['user_id', 'username', 'email', 'first_name', 'last_name']
-        read_only_fields = ['user_id']
+        fields = ['user_id', 'first_name', 'last_name', 'email', 'phone_number', 'role', 'created_at']
+        read_only_fields = ['user_id', 'created_at']
+
+    def create(self, validated_data):
+        """
+        Create and return a new `User` instance, given the validated data.
+        We will manually set the password since AbstractUser handles hashing.
+        """
+        password = validated_data.pop('password_hash', None)
+        user = User.objects.create_user(**validated_data)
+        if password is not None:
+            user.set_password(password)
+            user.save()
+        return user
+
+    def update(self, instance, validated_data):
+        """
+        update and return an existing `User` instance, given the validated data.
+        """
+        password = validated_data.pop('password_hash', None)
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+
+        if password is not None:
+            instance.set_password(password)
+        instance.save()
+        return instance
 
 
 class MessageSerializer(serializers.ModelSerializer):
-    sender_name = serializers.CharField(source='sender.username', read_only=True)
-    receiver_name = serializers.CharField(source='receiver.username', read_only=True)
+    """
+    Serializer for a Message object.
 
+    This serializer is used to convert a Message model instance into JSON representation.
+    It includes the sender's user_id and message content, along with the timestamp.
+    """
+    sender = serializers.ReadOnlyField(source='sender.username')
     class Meta:
         model = Message
-        fields = ['message_id', 'conversation', 'sender', 'receiver', 'message_body', 'send_at', 'created_at']
-        read_only_fields = ['message_id', 'send_at', 'created_at']
-
-    def validate_message_body(self, value):
-        if not value.strip():
-            raise serializers.ValidationError("Message content cannot be empty.")
-        return value
+        fields = ['message_id', 'sender', 'sender_id', 'message_body', 'sent_at']
+        read_only_fields = ['message_id', 'sent_at', 'sender']
 
 
 class ConversationSerializer(serializers.ModelSerializer):
-    participants = UserSerializer(many=True, read_only=True)
+    """
+    Serializer for the Conversation model, including nested messages.
+
+    This serializer handles the Conversation model, showing its participants
+    and a list of all messages associated with that conversation,
+    ordered by the time they were sent
+    """
     messages = MessageSerializer(many=True, read_only=True)
-    last_message = serializers.SerializerMethodField()
+    participants = serializers.PrimaryKeyRelatedField(many=True, queryset=User.objects.all())
 
     class Meta:
         model = Conversation
-        fields = ['conversation_id', 'participants', 'messages', 'created_at', 'updated_at', 'last_message']
-        read_only_fields = ['conversation_id', 'created_at', 'updated_at']
-
-    def get_last_message(self, obj):
-        last_message = obj.messages.order_by('-timestamp').first()
-        if last_message:
-            return {
-                'message_body': last_message.message_body,
-                'sender': last_message.sender.username,
-                'timestamp': last_message.timestamp
-            }
-        return None
-
-    def validate(self, data):
-        if 'participants' in self.initial_data and not self.initial_data['participants']:
-            raise serializers.ValidationError("A conversation must have at least one participant.")
-        return data
+        fields = ['conversation_id', 'participants', 'created_at', 'messages']
+        read_only_fields = ['conversation_id', 'created_at']
