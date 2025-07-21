@@ -48,11 +48,16 @@ class MessageSerializer(serializers.ModelSerializer):
     This serializer is used to convert a Message model instance into JSON representation.
     It includes the sender's user_id and message content, along with the timestamp.
     """
-    sender = serializers.ReadOnlyField(source='sender.username')
+    sender = serializers.CharField(source='sender.username')
     class Meta:
         model = Message
         fields = ['message_id', 'sender', 'sender_id', 'message_body', 'sent_at']
         read_only_fields = ['message_id', 'sent_at', 'sender']
+
+    def validate_message_body(self, value):
+        if not value.strip():
+            raise serializers.ValidationError("Message body cannot be empty.")
+        return value
 
 
 class ConversationSerializer(serializers.ModelSerializer):
@@ -65,8 +70,19 @@ class ConversationSerializer(serializers.ModelSerializer):
     """
     messages = MessageSerializer(many=True, read_only=True)
     participants = serializers.PrimaryKeyRelatedField(many=True, queryset=User.objects.all())
+    last_message = serializers.SerializerMethodField()
 
     class Meta:
         model = Conversation
         fields = ['conversation_id', 'participants', 'created_at', 'messages']
         read_only_fields = ['conversation_id', 'created_at']
+
+    def get_last_message(self, obj):
+        last_message = obj.messages.order_by('-sent_at').first()
+        if last_message:
+            return {
+                'message_body': last_message.message_body,
+                'sender': last_message.sender.username,
+                'timestamp': last_message.timestamp
+            }
+        return None
