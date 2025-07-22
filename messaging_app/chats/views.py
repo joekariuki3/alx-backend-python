@@ -54,21 +54,19 @@ class MessageViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
-        conversation_pk = self.kwargs.get('conversation_pk')
-        if conversation_pk:
-            return Message.objects.filter(conversation__conversation_id=conversation_pk).order_by('sent_at')
-        return Message.objects.all().order_by('sent_at')
-
-    def perform_create(self, serializer):
-        conversation_pk = self.kwargs.get('conversation_conversation_pk')
-        conversation = Conversation.objects.get(conversation_id=conversation_pk)
-        serializer.save(sender=self.request.user, conversation=conversation)
-
-    def get_queryset(self):
         """
         Filter messages by conversation ID, if provided in the URL.
         """
-        conversation_pk = self.kwargs.get('conversation_pk') # Assuming a nested URL structure
+        conversation_pk = self.kwargs.get('conversation_pk')
         if conversation_pk:
             return Message.objects.filter(conversation__conversation_id=conversation_pk).order_by('sent_at')
         return super().get_queryset()
+
+    def perform_create(self, serializer):
+        print(self.kwargs)
+        conversation_pk = self.kwargs.get('conversation_pk')
+        if conversation_pk:
+            conversation = Conversation.objects.get(conversation_id=conversation_pk)
+            serializer.save(sender_id=self.request.user, conversation=conversation)
+        else:
+            print("No conversation_pk found in URL.")
