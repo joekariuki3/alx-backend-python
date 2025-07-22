@@ -37,6 +37,8 @@ class User(AbstractUser):
             models.Index(fields=['email']),
         ]
 
+    def __str__(self):
+        return f"{self.username}, {self.email}"
 
 class Conversation(models.Model):
     """Represents a conversation model for capturing interactions between users.
@@ -55,6 +57,8 @@ class Conversation(models.Model):
     participants = models.ManyToManyField(User, related_name="conversations")
     created_at = models.DateTimeField(auto_now_add=True)
 
+    def __str__(self):
+        return f"Conversation {self.conversation_id}, participants: {[user.username for user in self.participants.all()] }"
 
 class Message(models.Model):
     """
@@ -78,3 +82,6 @@ class Message(models.Model):
     conversation = models.ForeignKey(Conversation, on_delete=models.CASCADE, related_name="messages")
     message_body = models.TextField(null=False)
     sent_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Message {self.message_id} sender: {self.sender_id.username}, conversation: {self.conversation.conversation_id}"
