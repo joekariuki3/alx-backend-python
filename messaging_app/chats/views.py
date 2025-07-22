@@ -50,16 +50,19 @@ class MessageViewSet(viewsets.ModelViewSet):
     A ViewSet for viewing, creating, and editing message instances.
     Provides list, create, retrieve, update, and destroy actions.
     """
-    queryset = Message.objects.all().order_by('-sent_at')
     serializer_class = MessageSerializer
     permission_classes = [permissions.IsAuthenticated]
 
+    def get_queryset(self):
+        conversation_pk = self.kwargs.get('conversation_pk')
+        if conversation_pk:
+            return Message.objects.filter(conversation__conversation_id=conversation_pk).order_by('sent_at')
+        return Message.objects.all().order_by('sent_at')
+
     def perform_create(self, serializer):
-        """
-        When creating a message, automatically set the sender to the current user.
-        The `conversation` field should be provided in the request data.
-        """
-        serializer.save(sender_id=self.request.user.id)
+        conversation_pk = self.kwargs.get('conversation_conversation_pk')
+        conversation = Conversation.objects.get(conversation_id=conversation_pk)
+        serializer.save(sender=self.request.user, conversation=conversation)
 
     def get_queryset(self):
         """
