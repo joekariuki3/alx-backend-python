@@ -134,4 +134,4 @@ class MessageViewSet(viewsets.ModelViewSet):
         if not conversation.participants.filter(user_id=self.request.user.user_id).exists():
             raise serializer.ValidationError({"detail": "You can only send messages to conversations you are a participant of."})
 
-        serializer.save(sender=self.request.user, conversation=conversation)
+        serializer.save(sender_id=self.request.user, conversation=conversation)
