@@ -1,12 +1,14 @@
-# your_app_name/views.py
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
+from django_filters.rest_framework import DjangoFilterBackend
 from .permissions import IsParticipantOfConversation
 
 from .models import Conversation, Message, User
 from .serializers import ConversationSerializer, MessageSerializer
+from .pagination import StandardResultsSetPagination
+from .filters import MessageFilter
 
 class ConversationViewSet(viewsets.ModelViewSet):
     """
@@ -83,6 +85,9 @@ class MessageViewSet(viewsets.ModelViewSet):
     queryset = Message.objects.all().order_by('sent_at')
     serializer_class = MessageSerializer
     permission_classes = [IsAuthenticated, IsParticipantOfConversation]
+    pagination_class = StandardResultsSetPagination
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = MessageFilter
 
 
     def get_queryset(self):
