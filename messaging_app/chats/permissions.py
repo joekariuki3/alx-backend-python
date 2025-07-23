@@ -1,53 +1,77 @@
 from rest_framework import permissions
+from .models import Conversation, Message
 
-class IsConversationParticipant(permissions.BasePermission):
+class IsParticipantOfConversation(permissions.BasePermission):
     """
-    Custom permission to only allow participants of a conversation to view or interact with it
-    """
-    message = "You are not a participant of this conversation"
+    Permission class to check if the user is a participant of a conversation.
 
-    def has_object_permission(self, request, view, obj):
+    This class ensures that the user requesting access to a specific conversation or
+    message is authenticated and authorized by verifying their participation in the
+    conversation. The permission can be used to restrict access to resources or
+    functionalities based on the user's involvement in a conversation.
+
+    Attributes:
+        message : str
+            A message returned when the user does not have sufficient permissions.
+    """
+    message = "You are not a participant in this conversation. Please join the conversation to access this resource."
+
+    def has_permission(self, request, view):
         """
-        Determines if the user has permission to access a specific Conversation object.
-
-        This method checks whether the requesting user is a participant of
-        the Conversation object. It verifies the user's presence in the object's
-        participant list and returns the result.
+        Determines if a user has the necessary permissions to access or perform an action
+        on a specific view or conversation. This includes checking for user authentication
+        and verifying the user's participation in a conversation if applicable.
 
         Parameters:
-        request: The HTTP request object containing user information.
-        view: The current view instance handling the request.
-        obj (Conversation instance): The object for which the permission check is performed.
+            request: The request object containing user and request metadata.
+            view: The view being accessed, which may contain details and keyword arguments
+                  for permission checks.
 
         Returns:
-        bool: True if the user is a participant of the object, False otherwise.
+            bool: True if the user is authorized to access the resource or perform the
+            requested action, otherwise False.
         """
-        return obj.participants.filter(user_id=request.user.user_id).exists()
+        if not request.user.is_authenticated:
+            return False
 
+        if view.detail:
+            return True
 
-class IsMessageSender(permissions.BasePermission):
-    """
-    Custom permission to only allow the sender of a message to update or delete it.
-    Read access (GET) is allowed for any participants of the conversation.
-    """
-    message = "You are not the sender of this message"
+        if 'conversation_pk' in view.kwargs:
+            conversation_id = view.kwargs['conversation_pk']
+            try:
+                conversation = Conversation.objects.get(conversation_id=conversation_id)
+                return conversation.participants.filter(user_id=request.user.user_id).exists()
+            except Conversation.DoesNotExist:
+                return False
+        return True
 
     def has_object_permission(self, request, view, obj):
         """
-        Determines whether a user has the required permissions to access or modify the Message object.
+        Determines if the user has the necessary permissions to access a specific object.
+        The object can either be a Conversation or a Message instance. The permission
+        check ensures that the requesting user is authenticated and is a participant
+        in the Conversation or its associated parent Conversation (for Messages).
 
-        This method assesses user permissions based on the HTTP request method. For safe methods,
-        it checks if the user is a participant in the corresponding conversation. For modification
-        attempts, it verifies if the user is the sender of the Message object.
-
-        Args:
-            request: The HTTP request object containing details of the request.
-            view: The view the user is trying to access.
-            obj (Message instance): The object being accessed or modified.
+        Parameters:
+        request : HttpRequest
+            The HTTP request object containing the user making the request.
+        view : View
+            The view being accessed.
+        obj : Conversation or Message
+            The specific instance of Conversation or Message being accessed.
 
         Returns:
-            bool: True if the user has the necessary permissions, False otherwise.
+        bool
+            True if the user is authenticated and has access to the object, False otherwise.
         """
-        if request.method in permissions.SAFE_METHODS:
+        if not request.user.is_authenticated:
+            return False
+
+        if isinstance(obj, Conversation):
+            return obj.participants.filter(user_id=request.user.user_id).exists()
+
+        if isinstance(obj, Message):
             return obj.conversation.participants.filter(user_id=request.user.user_id).exists()
-        return obj.sender_id == request.user.user_id
+
+        return False
