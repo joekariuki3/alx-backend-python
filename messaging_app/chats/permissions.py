@@ -65,6 +65,7 @@ class IsParticipantOfConversation(permissions.BasePermission):
         bool
             True if the user is authenticated and has access to the object, False otherwise.
         """
+        NOT_SAFE_METHODS = ['POST', 'PUT', 'PATCH', 'DELETE']
         if not request.user.is_authenticated:
             return False
 
@@ -72,6 +73,11 @@ class IsParticipantOfConversation(permissions.BasePermission):
             return obj.participants.filter(user_id=request.user.user_id).exists()
 
         if isinstance(obj, Message):
-            return obj.conversation.participants.filter(user_id=request.user.user_id).exists()
+            isParticipant = obj.conversation.participants.filter(user_id=request.user.user_id).exists()
+
+            if request.method in permissions.SAFE_METHODS:
+                return isParticipant
+            elif request.method in NOT_SAFE_METHODS:
+                return isParticipant and obj.sender_id == request.user
 
         return False
