@@ -8,9 +8,15 @@ class RequestLoggingMiddleware:
         self.get_response = get_response
 
     def __call__(self, request):
+        # Before getting to view, request before getting to the view
+
         log_file = 'requests.log'
         log_string = f"{datetime.now()} - User: {request.user} - Path: {request.path}\n"
         with open(log_file, 'a') as f:
             written_char = f.write(log_string)
+
         response = self.get_response(request)
+
+        # After the view, response back to a client
+
         return response
