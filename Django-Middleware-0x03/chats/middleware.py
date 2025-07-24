@@ -1,4 +1,5 @@
-from datetime import datetime, time
+from datetime import datetime, time, timedelta
+
 from django.http.response import HttpResponseForbidden
 
 
@@ -41,3 +42,58 @@ class RestrictAccessByTimeMiddleware:
 
         response = self.get_response(request)
         return response
+
+class OffensiveLanguageMiddleware:
+    """
+    Middleware that limits the number of chat messages a user can send within a certain time window,
+    based on their IP address.
+    """
+    def __init__(self, get_response):
+        self.get_response = get_response
+        self.requests_per_ip = {}
+        self.time_window = 60  # 1 minute
+        self.max_post_requests = 10  # 10 messages per minute
+
+    def __call__(self, request):
+        """
+        Count the number of POST requests (messages) from each IP address and implement
+        a time window during which a user can only send a limited number of messages.
+        """
+        if request.method == 'POST':
+            ip_address = request.META.get('REMOTE_ADDR')
+            current_time = datetime.now()
+
+            # Clean up old entries
+            self._cleanup_old_requests(current_time)
+
+            if ip_address not in self.requests_per_ip:
+                self.requests_per_ip[ip_address] = []
+
+            # Add current request timestamp
+            self.requests_per_ip[ip_address].append(current_time)
+
+            # Count requests within the time window
+            window_start = current_time - timedelta(seconds=self.time_window)
+            requests_in_window = sum(
+                1 for timestamp in self.requests_per_ip[ip_address]
+                if timestamp > window_start
+            )
+
+            if requests_in_window > self.max_post_requests:
+                return HttpResponseForbidden(
+                    f"Rate limit exceeded. Maximum {self.max_post_requests} messages per {self.time_window} seconds."
+                )
+
+        response = self.get_response(request)
+        return response
+
+    def _cleanup_old_requests(self, current_time):
+        """Remove entries older than the time window"""
+        window_start = current_time - timedelta(seconds=self.time_window)
+        for ip in list(self.requests_per_ip.keys()):
+            self.requests_per_ip[ip] = [
+                timestamp for timestamp in self.requests_per_ip[ip]
+                if timestamp > window_start
+            ]
+            if not self.requests_per_ip[ip]:
+                del self.requests_per_ip[ip]
