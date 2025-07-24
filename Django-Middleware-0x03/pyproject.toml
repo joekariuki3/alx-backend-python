@@ -1,0 +1,38 @@
+[project]
+name = "messaging-app"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "djangorestframework>=3.16.0",
+]
+[project]
+name = "messaging_app"
+version = "0.1.0"
+description = "A Django-based real-time messaging application"
+requires-python = ">=3.10"
+
+[build-system]
+requires = ["setuptools>=42", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.uv]
+packages = [
+    "django>=4.2",
+    "djangorestframework",
+    "drf-nested-routers",
+    "djangorestframework-simplejwt",
+    "python-dotenv",
+]
+
+[tool.pytest]
+addopts = "--cov=messaging_app"
+pythonpath = "."
+
+[tool.black]
+line-length = 88
+target-version = ['py310']
+
+[tool.isort]
+profile = "black"
