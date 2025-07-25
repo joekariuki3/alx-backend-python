@@ -13,6 +13,7 @@ class UserRole(models.TextChoices):
     HOST = 'host'
     GUEST = 'guest'
     ADMIN = 'admin'
+    MODERATOR = 'moderator'
 
 class User(AbstractUser):
     """

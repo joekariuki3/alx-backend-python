@@ -1,6 +1,8 @@
 from datetime import datetime, time, timedelta
-
 from django.http.response import HttpResponseForbidden
+from rest_framework_simplejwt.authentication import JWTAuthentication
+from rest_framework.exceptions import AuthenticationFailed
+from .models import UserRole
 
 
 class RequestLoggingMiddleware:
@@ -97,3 +99,27 @@ class OffensiveLanguageMiddleware:
             ]
             if not self.requests_per_ip[ip]:
                 del self.requests_per_ip[ip]
+
+class RolepermissionMiddleware:
+    """
+    Middleware that checks a user role before allowing access to specific actions.
+    """
+
+    def __init__(self, get_response):
+        self.get_response = get_response
+        self.jwt_authentication = JWTAuthentication()
+
+    def __call__(self, request):
+        try:
+            user_auth_tuple = self.jwt_authentication.authenticate(request)
+            if user_auth_tuple is not None:
+                user, token = user_auth_tuple
+                request.user = user
+                if request.user.role not in [UserRole.ADMIN, UserRole.MODERATOR]:
+                    message = (f"Access to messaging restricted. You are `{request.user.role}`."
+                               f"only `{UserRole.ADMIN}` and `{UserRole.MODERATOR}` has access.")
+                    return HttpResponseForbidden(message)
+        except AuthenticationFailed:
+            pass # view will handle unauthenticated access
+        response = self.get_response(request)
+        return response
