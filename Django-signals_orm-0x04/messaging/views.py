@@ -1,5 +1,5 @@
-from .models import User, Message, Notification
-from .serializers import UserSerializer, MessageSerializer , NotificationSerializer
+from .models import User, Message, Notification, MessageHistory
+from .serializers import UserSerializer, MessageSerializer , NotificationSerializer, MessageHistorySerializer
 from rest_framework import viewsets
 
 class UserViewSet(viewsets.ModelViewSet):
@@ -13,3 +13,7 @@ class MessageViewSet(viewsets.ModelViewSet):
 class NotificationViewSet(viewsets.ModelViewSet):
     queryset = Notification.objects.all()
     serializer_class = NotificationSerializer
+
+class MessageHistoryViewSet(viewsets.ModelViewSet):
+    queryset = MessageHistory.objects.all()
+    serializer_class = MessageHistorySerializer
