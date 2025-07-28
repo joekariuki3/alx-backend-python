@@ -18,8 +18,9 @@ class MessageViewSet(viewsets.ModelViewSet):
     serializer_class = MessageSerializer
 
     def get_queryset(self):
+        request = self.request
         return Message.objects.filter(
-            sender=self.request.user.id,
+            sender=request.user.id,
             parent_message__isnull=True).prefetch_related(
             'replies',
             'replies__sender',
