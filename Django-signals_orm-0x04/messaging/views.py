@@ -1,7 +1,7 @@
 from rest_framework.response import Response
 
 from .models import User, Message, Notification, MessageHistory
-from .serializers import UserSerializer, MessageSerializer , NotificationSerializer, MessageHistorySerializer
+from .serializers import UserSerializer, MessageSerializer , NotificationSerializer, MessageHistorySerializer, RecursiveMessageSerializer
 from rest_framework import viewsets, status
 
 
@@ -15,8 +15,15 @@ class UserViewSet(viewsets.ModelViewSet):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 class MessageViewSet(viewsets.ModelViewSet):
-    queryset = Message.objects.all()
     serializer_class = MessageSerializer
+
+    def get_queryset(self):
+        return Message.objects.filter(parent_message__isnull=True).prefetch_related(
+            'replies',
+            'replies__sender',
+            'replies__receiver',
+            'replies__replies'
+        ).select_related('sender', 'receiver')
 
 class NotificationViewSet(viewsets.ModelViewSet):
     queryset = Notification.objects.all()
