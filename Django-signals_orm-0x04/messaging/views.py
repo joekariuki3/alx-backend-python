@@ -29,7 +29,12 @@ class MessageViewSet(viewsets.ModelViewSet):
         ).select_related('sender', 'receiver')
 
     def get_unread_messages(self, request):
-        unread = Message.unread_messages.for_user(request.user)
+        unread = Message.unread.unread_for_user(request.user).only(
+            'sender',
+            'receiver',
+            'content',
+            'timestamp'
+        )
         return Response(MessageSerializer(unread, many=True).data)
 
 
