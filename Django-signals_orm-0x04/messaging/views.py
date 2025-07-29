@@ -28,6 +28,11 @@ class MessageViewSet(viewsets.ModelViewSet):
             'replies__replies'
         ).select_related('sender', 'receiver')
 
+    def get_unread_messages(self, request):
+        unread = Message.unread_messages.for_user(request.user)
+        return Response(MessageSerializer(unread, many=True).data)
+
+
 class NotificationViewSet(viewsets.ModelViewSet):
     queryset = Notification.objects.all()
     serializer_class = NotificationSerializer
