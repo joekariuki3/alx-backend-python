@@ -1,0 +1,95 @@
+```textmate
+pipeline {
+  agent {
+    docker {
+      image 'python:3.10'
+      args '-u root'
+    }
+  }
+
+  options {
+    ansiColor('xterm')
+    timestamps()
+  }
+
+  parameters {
+    string(name: 'GIT_REPO', defaultValue: 'https://github.com/joekariuki3/alx-backend-python/tree/master/messaging_app', description: 'GitHub repository URL')
+    string(name: 'GIT_BRANCH', defaultValue: 'master', description: 'Branch to build')
+  }
+
+  environment {
+    PATH = "$HOME/.local/bin:$PATH"
+    PYTHONDONTWRITEBYTECODE = '1'
+    PYTHONUNBUFFERED = '1'
+  }
+
+  stages {
+    stage('Checkout') {
+      steps {
+        git branch: params.GIT_BRANCH, url: params.GIT_REPO
+      }
+    }
+
+    stage('Install uv') {
+      steps {
+        sh '''
+          set -eux
+          apt-get update
+          apt-get install -y curl
+          curl -LsSf https://astral.sh/uv/install.sh | sh
+          uv --version
+        '''
+      }
+    }
+
+    stage('Install dependencies') {
+      steps {
+        sh '''
+          set -eux
+          # Sync project dependencies if pyproject exists; otherwise proceed.
+          if [ -f pyproject.toml ]; then
+            # Prefer frozen lock if present; fall back to resolving.
+            if [ -f uv.lock ] || [ -f poetry.lock ]; then
+              uv sync --frozen || uv sync
+            else
+              uv sync
+            fi
+          fi
+
+          # Ensure pytest is available for running tests in CI.
+          uv add pytest --dev || true
+        '''
+      }
+    }
+
+    stage('Run tests') {
+      steps {
+        sh '''
+          set -eux
+          mkdir -p reports
+          # Run pytest and generate JUnit XML report for Jenkins
+          uv run pytest -q --junitxml=reports/junit.xml
+        '''
+      }
+      post {
+        always {
+          junit testResults: 'reports/junit.xml', allowEmptyResults: true
+          archiveArtifacts artifacts: 'reports/**', onlyIfSuccessful: false
+        }
+      }
+    }
+  }
+
+  post {
+    always {
+      echo 'Pipeline finished.'
+    }
+    success {
+      echo 'Build succeeded.'
+    }
+    failure {
+      echo 'Build failed.'
+    }
+  }
+}
+```
