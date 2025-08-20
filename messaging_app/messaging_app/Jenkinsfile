@@ -48,7 +48,7 @@ pipeline {
         sh '''
           set -eux
           if [ -f requirements.txt ]; then
-            .venv/bin/pip3 install -r requirements.txt
+            .venv/bin/pip3 install -r messaging_app/requirements.txt
           else
             echo "requirements.txt not found. Installing pytest so tests can run; add a requirements.txt for reproducible installs." >&2
             .venv/bin/pip install pytest
